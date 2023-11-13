@@ -1,0 +1,38 @@
+from datetime import datetime, timedelta
+
+def generuj_raport(przedzial_czasowy, kontrakty):
+    poczatek_przedzialu = datetime.fromisoformat(przedzial_czasowy[0])
+    koniec_przedzialu = datetime.fromisoformat(przedzial_czasowy[1])
+    przedzialy_sumowania = []
+    przedzialy_sumowania.append([poczatek_przedzialu, koniec_przedzialu])
+
+    for kontrakt in kontrakty:
+
+        poczatek_kontraktu = datetime.fromisoformat(kontrakt['POCZĄTEK'])
+        koniec_kontraktu = datetime.fromisoformat(kontrakt['KONIEC']) if kontrakt['KONIEC'] else None
+        if koniec_kontraktu and koniec_kontraktu > poczatek_przedzialu and poczatek_kontraktu < koniec_przedzialu:
+
+            if poczatek_kontraktu < poczatek_przedzialu:
+                poczatek_kontraktu = poczatek_przedzialu
+            if koniec_kontraktu > koniec_przedzialu:
+                koniec_kontraktu = koniec_przedzialu
+
+            przedzialy_sumowania.append([poczatek_kontraktu, koniec_kontraktu])
+
+    przedzialy_sumowania.sort()
+    przedzialy_sumowania = [przedzial for przedzial in przedzialy_sumowania if przedzial[0] != przedzial[1]]
+
+    return przedzialy_sumowania
+przedzial_czasowy = ['2023-03-28T00:00:00+02:00', '2024-02-04T00:00:00+01:00']
+kontrakty = [
+    {'POCZĄTEK': '2023-12-30T02:00:00+03:00', 'KONIEC': '2024-01-04T19:00:00-04:00'},
+    {'POCZĄTEK': '2023-04-23T00:00:00+02:00', 'KONIEC': '2023-05-01T11:00:00+13:00'},
+    {'POCZĄTEK': '2023-05-11T11:00:00+13:00', 'KONIEC': '2023-12-30T02:00:00+03:00'},
+    {'POCZĄTEK': '2023-12-30T02:00:00+03:00', 'KONIEC': '2023-02-25T06:00:00+07:00'},
+    {'POCZĄTEK': '2023-03-25T00:00:00+01:00', 'KONIEC': '2023-04-14T00:00:00+02:00'},
+    {'POCZĄTEK': '2024-01-04T19:00:00-04:00', 'KONIEC': None}
+]
+wynik = generuj_raport(przedzial_czasowy, kontrakty)
+
+for przedzial in wynik:
+    print([przedzial[0].isoformat(), przedzial[1].isoformat()])
