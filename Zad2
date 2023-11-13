@@ -1,0 +1,45 @@
+from datetime import datetime, timedelta
+from collections import defaultdict
+import math
+
+def zaokragl_do_pelnych_godzin(data_i_godzina):
+    return datetime(data_i_godzina.year, data_i_godzina.month, data_i_godzina.day, data_i_godzina.hour)
+
+def przetworz_dane_wejsciowe(dane_wejsciowe):
+    # Inicjalizacja słownika do przechowywania sum zużytych materiałów
+    zuzyte_materialy = defaultdict(lambda: defaultdict(float))
+
+    # Przetwarzanie każdego wpisu w danych wejściowych
+    for wpis in dane_wejsciowe:
+        # Konwersja daty i godziny
+        data_i_godzina = datetime.strptime(wpis['TIMESTAMP'], '%Y-%m-%d %H:%M:%S%z')
+
+        # Zaokrąglenie do pełnych godzin
+        zaokraglona_data_i_godzina = zaokragl_do_pelnych_godzin(data_i_godzina)
+
+        # Dodanie zużycia materiałów do odpowiednich kategorii
+        zuzyte_materialy[zaokraglona_data_i_godzina]['drewno'] += wpis['WOOD']
+        zuzyte_materialy[zaokraglona_data_i_godzina]['farba'] += wpis['PAINT'] / 1000  # przeliczenie na litry
+        zuzyte_materialy[zaokraglona_data_i_godzina]['gwoździe'] += wpis['NAIL']
+        zuzyte_materialy[zaokraglona_data_i_godzina]['sznur'] += wpis['CORD']
+
+    # Zwrócenie wyników
+    return zuzyte_materialy
+
+# Dane wejściowe
+dane_wejsciowe = [
+    {'TIMESTAMP': '2023-01-29 22:40:00-02:00', 'WOOD': 20, 'PAINT': 1000, 'NAIL': 50, 'CORD': 2},
+    {'TIMESTAMP': '2023-01-29 22:30:00-02:00', 'WOOD': 45, 'PAINT': 1200, 'NAIL': 20, 'CORD': 1},
+    {'TIMESTAMP': '2023-01-29 23:01:00-02:00', 'WOOD': 15, 'PAINT': 1400, 'NAIL': 75, 'CORD': 3},
+    {'TIMESTAMP': '2023-01-30 08:10:00-02:00', 'WOOD': 30, 'PAINT': 1100, 'NAIL': 33, 'CORD': 2},
+    {'TIMESTAMP': '2023-01-30 08:50:00-02:00', 'WOOD': 25, 'PAINT': 1200, 'NAIL': 21, 'CORD': 2},
+]
+
+# Wywołanie funkcji
+wynik = przetworz_dane_wejsciowe(dane_wejsciowe)
+
+# Wydrukowanie wyników
+for zaokraglona_data_i_godzina, materialy in wynik.items():
+    print(f'TIMESTAMP: {zaokraglona_data_i_godzina.strftime("%Y-%m-%d %H:%M:%S%z")}')
+    for material, ilosc in materialy.items():
+        print(f'{material}: {ilosc:.1f}')
